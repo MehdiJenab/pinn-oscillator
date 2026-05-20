@@ -1,0 +1,1 @@
+"""Core utilities for the PINN harmonic oscillator project."""
