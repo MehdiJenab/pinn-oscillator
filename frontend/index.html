@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PINN Harmonic Oscillator</title>
+<link rel="stylesheet" href="/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PINN Harmonic Oscillator</h1>
+            <p>Interactive Physics-Informed Neural Network for solving harmonic oscillator ODE</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Sidebar with controls -->
+            <aside class="controls">
+                <div class="control-group">
+                    <h3>Model Parameters</h3>
+                    
+                    <div class="control-item">
+                        <label for="omega">Natural Frequency (ω)</label>
+                        <div class="input-row">
+                            <input type="range" id="omega" min="0.1" max="10" step="0.1" value="1.0">
+                            <span id="omega-value" class="value-display">1.0</span>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label for="t_max">Time Range (t_max)</label>
+                        <div class="input-row">
+                            <input type="range" id="t_max" min="1" max="50" step="1" value="10">
+                            <span id="t_max-value" class="value-display">10</span>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label for="epochs">Training Epochs</label>
+                        <div class="input-row">
+                            <input type="range" id="epochs" min="100" max="2000" step="100" value="1000">
+                            <span id="epochs-value" class="value-display">1000</span>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label for="hidden_dim">Hidden Layer Size</label>
+                        <div class="input-row">
+                            <input type="range" id="hidden_dim" min="10" max="100" step="10" value="50">
+                            <span id="hidden_dim-value" class="value-display">50</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>Training Parameters</h3>
+                    
+                    <div class="control-item">
+                        <label for="learning_rate">Learning Rate</label>
+                        <div class="input-row">
+                            <input type="range" id="learning_rate" min="0.001" max="0.1" step="0.001" value="0.02">
+                            <span id="learning_rate-value" class="value-display">0.02</span>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label for="weight_decay">Weight Decay</label>
+                        <div class="input-row">
+                            <input type="range" id="weight_decay" min="0" max="0.1" step="0.001" value="0.01">
+                            <span id="weight_decay-value" class="value-display">0.01</span>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label for="lambda_ic">IC Loss Weight (λ_IC)</label>
+                        <div class="input-row">
+                            <input type="range" id="lambda_ic" min="1" max="50" step="1" value="10">
+                            <span id="lambda_ic-value" class="value-display">10</span>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label for="lambda_physics">Physics Loss Weight (λ_physics)</label>
+                        <div class="input-row">
+                            <input type="range" id="lambda_physics" min="0.1" max="10" step="0.1" value="1.0">
+                            <span id="lambda_physics-value" class="value-display">1.0</span>
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label for="num_domain_points">Domain Points</label>
+                        <div class="input-row">
+                            <input type="range" id="num_domain_points" min="100" max="1000" step="50" value="500">
+                            <span id="num_domain_points-value" class="value-display">500</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="train-btn" class="train-btn">Train Model</button>
+
+                <button id="reset-btn" class="reset-btn">Reset to Default</button>
+
+                <div id="status" class="status-message"></div>
+                
+                <div id="progress-container" class="progress-container" style="display: none;">
+                    <div class="progress-bar">
+                        <div id="progress" class="progress-fill"></div>
+                    </div>
+                    <div id="progress-text" class="progress-text">0%</div>
+                </div>
+            </aside>
+
+            <!-- Main visualization area -->
+            <main class="visualization">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="prediction">Prediction</button>
+                    <button class="tab-btn" data-tab="training">Training History</button>
+                    <button class="tab-btn" data-tab="residual">Residual</button>
+                    <button class="tab-btn" data-tab="phase-space">Phase Space</button>
+                </div>
+
+                <div class="tab-content active" id="prediction-tab">
+                    <div class="chart-container">
+                        <canvas id="prediction-chart"></canvas>
+                    </div>
+                    <div class="chart-info">
+                        <h4>Legend:</h4>
+                        <div class="legend">
+                            <span class="legend-item"><span class="legend-color blue"></span>PINN Prediction</span>
+                            <span class="legend-item"><span class="legend-color red"></span>Analytical Solution</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="training-tab">
+                    <div class="chart-container">
+                        <canvas id="training-chart"></canvas>
+                    </div>
+                    <div class="chart-info">
+                        <h4>Final Loss: <span id="final-loss">-</span></h4>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="residual-tab">
+                    <div class="chart-container">
+                        <canvas id="residual-chart"></canvas>
+                    </div>
+                    <div class="chart-info">
+                        <p>Residual = d²x/dt² + ω²x. Should be close to zero for accurate solution.</p>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="phase-space-tab">
+                    <div class="chart-container">
+                        <canvas id="phase-space-chart"></canvas>
+                    </div>
+                    <div class="chart-info">
+                        <p>Phase space trajectory (position vs velocity). Should form an ellipse for undamped oscillator.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>

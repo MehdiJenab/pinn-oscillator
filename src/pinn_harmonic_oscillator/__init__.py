@@ -1,3 +1,3 @@
-"""Physics-Informed Neural Network for Harmonic Oscillator."""
+"""PINN Harmonic Oscillator Package"""
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"

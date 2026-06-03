@@ -1,1 +1,1 @@
-"""API endpoints for the PINN harmonic oscillator."""
+"""PINN Harmonic Oscillator API Module"""

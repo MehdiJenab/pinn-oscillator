@@ -57,11 +57,7 @@ class Trainer:
 
         # Get x predictions - use provided x or compute from pinn
         if x is not None:
-            # Ensure x is from t with grad tracking
-            if x.grad_fn is None:
-                x_pred = x
-            else:
-                x_pred = x
+            x_pred = x
         else:
             x_pred = self.pinn.forward(t)
 
@@ -72,7 +68,7 @@ class Trainer:
 
         # Compute second derivative: d²x/dt²
         d2x_dt2 = torch.autograd.grad(
-            dx_dt.sum(), t, create_graph=True
+            dx_dt.sum(), t, create_graph=True, retain_graph=True
         )[0]
 
         # ODE residual: d²x/dt² + ω²x = 0
@@ -96,7 +92,9 @@ class Trainer:
         Returns:
             Initial condition loss (scalar)
         """
-        return nn.MSELoss()(x0_pred, x0_true)
+        # Ensure t0 has gradient for backprop through the network
+        with torch.enable_grad():
+            return nn.MSELoss()(x0_pred, x0_true)
 
     def train_step(
         self, t_domain: torch.Tensor, t_ic: torch.Tensor, x_ic: torch.Tensor
@@ -116,6 +114,10 @@ class Trainer:
         # Ensure t_domain requires grad for physics loss computation
         if not t_domain.requires_grad:
             t_domain = t_domain.detach().clone().requires_grad_(True)
+
+        # Ensure t_ic has grad for backprop
+        if not t_ic.requires_grad:
+            t_ic = t_ic.detach().clone().requires_grad_(True)
 
         # Predictions for domain
         x_domain = self.pinn.forward(t_domain)

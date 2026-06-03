@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /home/mehdi/Desktop/)",
+      "Read(//home/mehdi/Desktop/**)",
+      "Bash(git -C /home/mehdi/Desktop/kdv-solitons log --oneline -10)",
+      "Bash(git -C /home/mehdi/Desktop/kdv-solitons status)",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(.venv/bin/python -m pytest tests/ -v)",
+      "Bash(curl -s -X POST http://localhost:5000/api/train -H \"Content-Type: application/json\" -d '{\"omega\":1.0,\"t_max\":10.0,\"num_domain_points\":500,\"hidden_dim\":50,\"epochs\":100,\"learning_rate\":0.02,\"weight_decay\":0.01,\"lambda_ic\":10.0,\"lambda_physics\":1.0}')",
+      "Bash(curl -s -X POST http://localhost:5000/api/train -H \"Content-Type: application/json\" -d '{\"omega\":1.0,\"t_max\":10.0,\"num_domain_points\":100,\"hidden_dim\":50,\"epochs\":50,\"learning_rate\":0.02,\"weight_decay\":0.01,\"lambda_ic\":10.0,\"lambda_physics\":1.0}')",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('t:', d['t'][:5]\\); print\\('x_pred:', d['x_pred'][:5]\\); print\\('x_analytical:', d['x_analytical'][:5]\\)\")",
+      "Bash(curl -s -X POST http://localhost:5000/api/train -H \"Content-Type: application/json\" -d '{\"omega\":1.0,\"t_max\":10.0,\"num_domain_points\":100,\"hidden_dim\":50,\"epochs\":100,\"learning_rate\":0.02,\"weight_decay\":0.01,\"lambda_ic\":10.0,\"lambda_physics\":1.0}')",
+      "Bash(pkill -f \"python -m pinn_harmonic_oscillator.api.app\")",
+      "Bash(python main.py)",
+      "Bash(pip install *)"
+    ]
+  }
+}
