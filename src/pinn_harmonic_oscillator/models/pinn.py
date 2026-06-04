@@ -108,7 +108,7 @@ class PINN(nn.Module):
     Uses a simple periodic architecture that learns cos(omega*t) directly.
     """
 
-    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, omega: float = 1.0):
+    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, omega: float = 1.0, damping_coefficient: float = 0.0):
         """Initialize PINN.
 
         Args:
@@ -116,11 +116,13 @@ class PINN(nn.Module):
             hidden_dim: Number of hidden units in each layer
             output_dim: Dimension of output (e.g., 1 for scalar position)
             omega: Initial guess for angular frequency
+            damping_coefficient: Damping coefficient for damped oscillations
         """
         super(PINN, self).__init__()
 
         self.input_dim = input_dim
         self.output_dim = output_dim
+        self.damping_coefficient = damping_coefficient
 
         # Learnable frequency parameter - initialized to 1.0
         # The network learns: x(t) = a * cos(omega * t + phase) + b

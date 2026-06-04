@@ -120,6 +120,23 @@ header p {
     text-align: right;
 }
 
+.numeric-input {
+    width: 80px;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: #fff;
+    font-family: monospace;
+    text-align: center;
+    transition: border-color 0.2s;
+}
+
+.numeric-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
 .train-btn {
     width: 100%;
     padding: 15px;

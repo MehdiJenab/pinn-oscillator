@@ -20,12 +20,22 @@
             <aside class="controls">
                 <div class="control-group">
                     <h3>Model Parameters</h3>
-                    
+
                     <div class="control-item">
                         <label for="omega">Natural Frequency (ω)</label>
                         <div class="input-row">
                             <input type="range" id="omega" min="0.1" max="10" step="0.1" value="1.0">
                             <span id="omega-value" class="value-display">1.0</span>
+                            <input type="number" id="omega-input" min="0.1" max="10" step="0.1" value="1.0" class="numeric-input">
+                        </div>
+                    </div>
+
+                    <div class="control-item">
+                        <label for="damping_coefficient">Damping Coefficient (γ)</label>
+                        <div class="input-row">
+                            <input type="range" id="damping_coefficient" min="0" max="10" step="0.1" value="0.0">
+                            <span id="damping_coefficient-value" class="value-display">0.0</span>
+                            <input type="number" id="damping_coefficient-input" min="0" max="10" step="0.1" value="0.0" class="numeric-input">
                         </div>
                     </div>
 
@@ -34,6 +44,7 @@
                         <div class="input-row">
                             <input type="range" id="t_max" min="1" max="50" step="1" value="10">
                             <span id="t_max-value" class="value-display">10</span>
+                            <input type="number" id="t_max-input" min="1" max="50" step="1" value="10" class="numeric-input">
                         </div>
                     </div>
 
@@ -42,6 +53,7 @@
                         <div class="input-row">
                             <input type="range" id="epochs" min="100" max="2000" step="100" value="1000">
                             <span id="epochs-value" class="value-display">1000</span>
+                            <input type="number" id="epochs-input" min="100" max="2000" step="100" value="1000" class="numeric-input">
                         </div>
                     </div>
 
@@ -50,18 +62,20 @@
                         <div class="input-row">
                             <input type="range" id="hidden_dim" min="10" max="100" step="10" value="50">
                             <span id="hidden_dim-value" class="value-display">50</span>
+                            <input type="number" id="hidden_dim-input" min="10" max="100" step="10" value="50" class="numeric-input">
                         </div>
                     </div>
                 </div>
 
                 <div class="control-group">
                     <h3>Training Parameters</h3>
-                    
+
                     <div class="control-item">
                         <label for="learning_rate">Learning Rate</label>
                         <div class="input-row">
                             <input type="range" id="learning_rate" min="0.001" max="0.1" step="0.001" value="0.02">
                             <span id="learning_rate-value" class="value-display">0.02</span>
+                            <input type="number" id="learning_rate-input" min="0.001" max="0.1" step="0.001" value="0.02" class="numeric-input">
                         </div>
                     </div>
 
@@ -70,6 +84,7 @@
                         <div class="input-row">
                             <input type="range" id="weight_decay" min="0" max="0.1" step="0.001" value="0.01">
                             <span id="weight_decay-value" class="value-display">0.01</span>
+                            <input type="number" id="weight_decay-input" min="0" max="0.1" step="0.001" value="0.01" class="numeric-input">
                         </div>
                     </div>
 
@@ -78,6 +93,7 @@
                         <div class="input-row">
                             <input type="range" id="lambda_ic" min="1" max="50" step="1" value="10">
                             <span id="lambda_ic-value" class="value-display">10</span>
+                            <input type="number" id="lambda_ic-input" min="1" max="50" step="1" value="10" class="numeric-input">
                         </div>
                     </div>
 
@@ -86,6 +102,7 @@
                         <div class="input-row">
                             <input type="range" id="lambda_physics" min="0.1" max="10" step="0.1" value="1.0">
                             <span id="lambda_physics-value" class="value-display">1.0</span>
+                            <input type="number" id="lambda_physics-input" min="0.1" max="10" step="0.1" value="1.0" class="numeric-input">
                         </div>
                     </div>
 
@@ -94,6 +111,7 @@
                         <div class="input-row">
                             <input type="range" id="num_domain_points" min="100" max="1000" step="50" value="500">
                             <span id="num_domain_points-value" class="value-display">500</span>
+                            <input type="number" id="num_domain_points-input" min="100" max="1000" step="50" value="500" class="numeric-input">
                         </div>
                     </div>
                 </div>

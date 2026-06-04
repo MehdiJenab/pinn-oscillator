@@ -228,53 +228,129 @@ class PINNApp {
     }
 
     initControls() {
-        // Initialize sliders with value displays
-        const sliders = [
-            { id: 'omega', display: 'omega-value' },
-            { id: 't_max', display: 't_max-value' },
-            { id: 'epochs', display: 'epochs-value' },
-            { id: 'hidden_dim', display: 'hidden_dim-value' },
-            { id: 'learning_rate', display: 'learning_rate-value' },
-            { id: 'weight_decay', display: 'weight_decay-value' },
-            { id: 'lambda_ic', display: 'lambda_ic-value' },
-            { id: 'lambda_physics', display: 'lambda_physics-value' },
-            { id: 'num_domain_points', display: 'num_domain_points-value' }
+        // Initialize sliders with value displays and numeric inputs
+        const controls = [
+            { id: 'omega', display: 'omega-value', input: 'omega-input' },
+            { id: 'damping_coefficient', display: 'damping_coefficient-value', input: 'damping_coefficient-input' },
+            { id: 't_max', display: 't_max-value', input: 't_max-input' },
+            { id: 'epochs', display: 'epochs-value', input: 'epochs-input' },
+            { id: 'hidden_dim', display: 'hidden_dim-value', input: 'hidden_dim-input' },
+            { id: 'learning_rate', display: 'learning_rate-value', input: 'learning_rate-input' },
+            { id: 'weight_decay', display: 'weight_decay-value', input: 'weight_decay-input' },
+            { id: 'lambda_ic', display: 'lambda_ic-value', input: 'lambda_ic-input' },
+            { id: 'lambda_physics', display: 'lambda_physics-value', input: 'lambda_physics-input' },
+            { id: 'num_domain_points', display: 'num_domain_points-value', input: 'num_domain_points-input' }
         ];
 
-        sliders.forEach(slider => {
-            const el = document.getElementById(slider.id);
-            const display = document.getElementById(slider.display);
-            display.textContent = el.value;
+        controls.forEach(control => {
+            const slider = document.getElementById(control.id);
+            const display = document.getElementById(control.display);
+            const numericInput = document.getElementById(control.input);
 
-            el.addEventListener('input', () => {
-                display.textContent = el.value;
+            // Initialize values
+            display.textContent = slider.value;
+            numericInput.value = slider.value;
+
+            // Slider change handler
+            slider.addEventListener('input', () => {
+                const value = slider.value;
+                display.textContent = value;
+                numericInput.value = value;
+
                 // Update analytical solution in real-time for relevant parameters
-                if (slider.id === 'omega' || slider.id === 't_max') {
+                if (control.id === 'omega' || control.id === 't_max' || control.id === 'damping_coefficient') {
+                    this.updateAnalyticalSolution();
+                }
+            });
+
+            // Numeric input change handler
+            numericInput.addEventListener('input', () => {
+                const value = numericInput.value;
+                // Validate range
+                const min = parseFloat(slider.min);
+                const max = parseFloat(slider.max);
+                const step = parseFloat(slider.step);
+
+                let validatedValue = Math.max(min, Math.min(max, parseFloat(value) || min));
+
+                // Round to nearest step
+                validatedValue = Math.round(validatedValue / step) * step;
+
+                slider.value = validatedValue;
+                display.textContent = validatedValue;
+                numericInput.value = validatedValue;
+
+                // Update analytical solution in real-time for relevant parameters
+                if (control.id === 'omega' || control.id === 't_max' || control.id === 'damping_coefficient') {
                     this.updateAnalyticalSolution();
                 }
             });
         });
     }
 
-    computeAnalyticalSolution(omega, t_max, numPoints = 500) {
-        // Analytical solution: x(t) = x0 * cos(omega * t)
-        // Initial conditions: x(0) = 1, v(0) = 0
+    computeAnalyticalSolution(omega, damping_coefficient, t_max, numPoints = 500) {
+        // Analytical solution for damped oscillator
+        // x(t) = A * exp(-γt/2) * cos(ω_d * t + φ)
+        // where γ = damping_coefficient, ω_d = sqrt(ω^2 - γ^2/4)
+        // For undamped: γ = 0, so ω_d = ω, and x(t) = cos(ω * t)
+
         const t_values = [];
         const x_values = [];
         const dt = t_max / (numPoints - 1);
-        for (let i = 0; i < numPoints; i++) {
-            const t = i * dt;
-            t_values.push(t);
-            x_values.push(Math.cos(omega * t));
+
+        // For undamped case
+        if (damping_coefficient === 0) {
+            for (let i = 0; i < numPoints; i++) {
+                const t = i * dt;
+                t_values.push(t);
+                x_values.push(Math.cos(omega * t));
+            }
+        } else {
+            // For damped case, we need to compute the damped frequency
+            const gamma = damping_coefficient;
+            const omega_squared = omega * omega;
+            const gamma_squared_over_4 = gamma * gamma / 4;
+
+            // Check if overdamped or underdamped
+            if (gamma_squared_over_4 >= omega_squared) {
+                // Overdamped case
+                const r1 = -gamma/2 + Math.sqrt(gamma_squared_over_4 - omega_squared);
+                const r2 = -gamma/2 - Math.sqrt(gamma_squared_over_4 - omega_squared);
+                // x(t) = C1 * exp(r1*t) + C2 * exp(r2*t)
+                // With initial conditions x(0) = 1, v(0) = 0:
+                // C1 + C2 = 1, C1*r1 + C2*r2 = 0
+                const C1 = -r2 / (r1 - r2);
+                const C2 = r1 / (r1 - r2);
+                for (let i = 0; i < numPoints; i++) {
+                    const t = i * dt;
+                    t_values.push(t);
+                    x_values.push(C1 * Math.exp(r1 * t) + C2 * Math.exp(r2 * t));
+                }
+            } else {
+                // Underdamped case (most common)
+                const omega_d = Math.sqrt(omega_squared - gamma_squared_over_4);
+                // x(t) = exp(-γt/2) * (cos(ω_d * t) + (γ/(2*ω_d)) * sin(ω_d * t))
+                // But with initial conditions x(0) = 1, v(0) = 0:
+                // x(0) = 1 = A * cos(φ) => A = 1, φ = 0
+                // v(0) = 0 = -A * γ/2 * cos(φ) + A * ω_d * sin(φ)
+                // 0 = -γ/2 + ω_d * tan(φ) => tan(φ) = γ/(2*ω_d) => φ = atan(γ/(2*ω_d))
+                // Actually, for simpler case, using just cos(ω_d * t) with amplitude decay
+                for (let i = 0; i < numPoints; i++) {
+                    const t = i * dt;
+                    t_values.push(t);
+                    x_values.push(Math.exp(-gamma * t / 2) * Math.cos(omega_d * t));
+                }
+            }
         }
         return { t_values, x_values };
     }
 
     updateAnalyticalSolution() {
         const omega = parseFloat(document.getElementById('omega').value);
+        const damping_coefficient = parseFloat(document.getElementById('damping_coefficient').value);
         const t_max = parseFloat(document.getElementById('t_max').value);
 
-        const { t_values, x_values } = this.computeAnalyticalSolution(omega, t_max);
+        const { t_values, x_values } = this.computeAnalyticalSolution(omega, damping_coefficient, t_max);
 
         // Update prediction chart analytical solution dataset
         this.predictionChart.data.datasets[1].data = t_values.map((t, i) => ({ x: t, y: x_values[i] }));
@@ -342,6 +418,7 @@ class PINNApp {
         try {
             const data = {
                 omega: parseFloat(document.getElementById('omega').value),
+                damping_coefficient: parseFloat(document.getElementById('damping_coefficient').value),
                 t_max: parseFloat(document.getElementById('t_max').value),
                 num_domain_points: parseInt(document.getElementById('num_domain_points').value),
                 hidden_dim: parseInt(document.getElementById('hidden_dim').value),

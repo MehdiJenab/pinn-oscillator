@@ -1,11 +1,18 @@
 {
+  "//": "LOCAL autonomy policy (this machine only; gitignored). Lets the local AI run without prompts, EXCEPT rm/mv which are hard-blocked. deny is evaluated before allow, so rm/mv stay blocked despite the broad Bash allow. Do NOT switch to bypassPermissions — that mode ignores deny rules entirely.",
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
-      "Bash(chmod +x *)",
-      "Bash(systemctl --user daemon-reload)",
-      "Bash(python3 *)",
-      "Bash(curl -s http://127.0.0.1:9300/metrics)",
-      "Bash(curl *)"
+      "Bash",
+      "Read",
+      "Edit",
+      "Write"
+    ],
+    "deny": [
+      "Bash(rm *)",
+      "Bash(rm)",
+      "Bash(mv *)",
+      "Bash(mv)"
     ]
   }
 }
